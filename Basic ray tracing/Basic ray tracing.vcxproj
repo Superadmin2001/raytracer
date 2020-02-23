@@ -150,6 +150,7 @@
     <ClCompile Include="src\plane.cpp" />
     <ClCompile Include="src\ray.cpp" />
     <ClCompile Include="src\shape.cpp" />
+    <ClCompile Include="src\shapes\cone.cpp" />
     <ClCompile Include="src\shapes\cube.cpp" />
     <ClCompile Include="src\shapes\cylinder.cpp" />
     <ClCompile Include="src\sphere.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="src\math\utils.h" />
     <ClInclude Include="src\rt.h" />
     <ClInclude Include="src\shape.h" />
+    <ClInclude Include="src\shapes\cone.h" />
     <ClInclude Include="src\shapes\cube.h" />
     <ClInclude Include="src\shapes\cylinder.h" />
     <ClInclude Include="src\sphere.h" />

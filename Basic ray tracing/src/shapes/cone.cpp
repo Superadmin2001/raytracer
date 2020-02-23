@@ -1,90 +1,97 @@
-#include "cylinder.h"
+#include "cone.h"
 #include "../intersection.h"
 #include "../defines.h"
 
-typedef struct cylinder_vtable
+typedef struct cone_vtable
 {
-	int(*intersect)(cylinder *c, intersections *is, ray r);
-	vec4f(*normalAt)(cylinder *c, vec4f *worldPoint);
+	int(*intersect)(cone *c, intersections *is, ray r);
+	vec4f(*normalAt)(cone *c, vec4f *worldPoint);
 } cylinder_vtable;
 
-static cylinder_vtable the_cylinder_vtable = {
-	cylinder_intersect,
-	cylinder_normalAt
+static cone_vtable the_cone_vtable = {
+	cone_intersect,
+	cone_normalAt
 };
 
-void cylinder_construct_default(cylinder *c)
+void cone_construct_default(cone *c)
 {
 	shape_construct(&c->base, mat4Identity(), createMaterial(createVec3f(0.8f, 1.f, 0.6f), 0.1, 0.7, 0.2, 200.f, 0.f, 0.0f, 1.0f));
-	c->base.vptr = (shape_vtable*)&the_cylinder_vtable;
+	c->base.vptr = (shape_vtable*)&the_cone_vtable;
 	c->min = FLT_MIN;
 	c->max = FLT_MAX;
 	c->closed = 0;
 }
 
-void cylinder_construct(cylinder *c, float min, float max, uint8 closed, mat4 transform, material material, vec4f position)
+void cone_construct(cone *c, float min, float max, uint8 closed, mat4 transform, material material, vec4f position)
 {
 	shape_construct(&c->base, transform, material);
-	c->base.vptr = (shape_vtable*)&the_cylinder_vtable;
+	c->base.vptr = (shape_vtable*)&the_cone_vtable;
 	c->min = min;
 	c->max = max;
 	c->closed = closed;
 }
 
-void cylinderSetTransform(cylinder *c, mat4 m)
+void coneSetTransform(cone *c, mat4 m)
 {
 	shape_setTransform((shape*)c, m);
 }
 
-void cylinderSetMaterial(cylinder *c, material m)
+void coneSetMaterial(cone *c, material m)
 {
 	shape_setMaterial((shape*)c, m);
 }
 
-void cylinderSetPattern(cylinder *c, pattern *pn)
+void coneSetPattern(cone *c, pattern *pn)
 {
 	pattern p = *pn;
 	materialSetPattern(&c->base.material, p);
 }
 
-internal uint8 checkCap(ray r, float t)
+internal uint8 checkCap(ray r, float t, float trunc)
 {
+	//trunc = fabsf(trunc);
+
 	float x = r.origin.x + t*r.direction.x;
 	float z = r.origin.z + t*r.direction.z;
 
-	/*if((x*x + z*z) <= 1+EPSILON || (x*x + z*z) <= 1-EPSILON)
+	if ((x*x + z*z) <= trunc + EPSILON || (x*x + z*z) <= trunc - EPSILON)
 		return true;
 
-	return false;*/
-
-	return (x*x + z*z) <= 1;
+	return false;
 }
 
-internal void intersectCaps(cylinder *c, intersections *is, ray r)
+internal void intersectCaps(cone *c, intersections *is, ray r)
 {
 	if (c->closed == false || fabsf(r.direction.y) <= EPSILON)
 		return;
 
 	float t = (c->min - r.origin.y) / r.direction.y;
-	if (checkCap(r, t))
+	if (checkCap(r, t, c->min))
 		addIntersection(is, createIntersection(t, (shape*)c));
 
 	t = (c->max - r.origin.y) / r.direction.y;
-	if (checkCap(r, t))
+	if (checkCap(r, t, c->max))
 		addIntersection(is, createIntersection(t, (shape*)c));
 }
 
-int cylinder_intersect(cylinder *c, intersections *is, ray r)
+int cone_intersect(cone *c, intersections *is, ray r)
 {
 	intersectCaps(c, is, r);
 
-	float a = r.direction.x * r.direction.x + r.direction.z * r.direction.z;
+	float a = r.direction.x * r.direction.x - r.direction.y * r.direction.y + r.direction.z * r.direction.z;
+	float b = (2 * r.origin.x * r.direction.x) - (2 * r.origin.y * r.direction.y) + (2 * r.origin.z * r.direction.z);
+	float cc = r.origin.x*r.origin.x - r.origin.y*r.origin.y + r.origin.z*r.origin.z - 1;
 
-	if (fabsf(a) <= EPSILON)
+	if (fabsf(a) <= EPSILON && fabsf(b) <= EPSILON)
+	{
 		return 0;
-
-	float b = (2 * r.origin.x * r.direction.x) + (2 * r.origin.z * r.direction.z);
-	float cc = r.origin.x*r.origin.x + r.origin.z*r.origin.z - 1;
+	}
+	else if (fabsf(a) <= EPSILON && fabsf(b) >= EPSILON)
+	{
+		float t = -cc / (2 * b);
+		addIntersection(is, createIntersection(t, (shape*)c));
+		return 0;
+	}
 
 	float d = b*b - 4 * a*cc;
 
@@ -100,7 +107,7 @@ int cylinder_intersect(cylinder *c, intersections *is, ray r)
 	float y0 = r.origin.y + t0*r.direction.y;
 	if (c->min < y0 && y0 < c->max)
 		addIntersection(is, createIntersection(t0, (shape*)c));
-	
+
 	float y1 = r.origin.y + t1*r.direction.y;
 	if (c->min < y1 && y1 < c->max)
 		addIntersection(is, createIntersection(t1, (shape*)c));
@@ -108,7 +115,7 @@ int cylinder_intersect(cylinder *c, intersections *is, ray r)
 	return 1;
 }
 
-vec4f cylinder_normalAt(cylinder *c, vec4f *point)
+vec4f cone_normalAt(cone *c, vec4f *point)
 {
 	float distance = point->x*point->x + point->z*point->z;
 
@@ -117,5 +124,9 @@ vec4f cylinder_normalAt(cylinder *c, vec4f *point)
 	else if (distance < 1 && point->y <= c->min + EPSILON)
 		return vec4fVector(0, -1, 0);
 
-	return vec4fVector(point->x, 0, point->z);
+	float y = sqrtf(distance);
+	if (point->y > 0)
+		y = -y;
+
+	return vec4fVector(point->x, y, point->z);
 }

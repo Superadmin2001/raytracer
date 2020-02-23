@@ -104,11 +104,11 @@ void trace()
 
 int main()
 {
-	//render();
+	render();
 #ifdef _DEBUG
 	//_CrtDumpMemoryLeaks();
 #endif
 	//rtTest();
-	test();
+	//test();
 	return(0);
 }

@@ -17,6 +17,7 @@
 
 #include "shapes\cube.h"
 #include "shapes\cylinder.h"
+#include "shapes\cone.h"
 
 internal color rtVec3fToColor(vec3f vec)
 {
@@ -121,7 +122,7 @@ void render()
 	light *lights = (light*)malloc(sizeof(light));
 	lights[0] = l;
 
-	uint8 shapeCount = 7;
+	uint8 shapeCount = 8;
 	shape **shapes = (shape**)malloc(sizeof(shape*) * shapeCount);
 	shapes[0] = (shape*)&middle;
 	shapes[1] = (shape*)&right;
@@ -166,9 +167,20 @@ void render()
 	cubeSetTransform(&cubeD, cubeTransform);
 	shapes[6] = (shape*)&cubeD;
 
+	cylinder cyl;
+	cylinder_construct_default(&cyl);
+	cyl.min = 1;
+	cyl.max = 2;
+	cyl.closed = true;
+	mat4 cylinderRotaion = mat4RotationX(degreesToRadians(60));
+	mat4 cylinderTranslation = mat4Translation(vec4fVector(2, 2, 0));
+	mat4 cylinderTransform = mat4Mul(&cubeTranslation, &cylinderRotaion);
+	cylinderSetTransform(&cyl, cylinderTransform);
+	shapes[7] = (shape*)&cyl;
+
 	world w = worldCreate(lights, 1, shapes, shapeCount);
 
-	uint32 width = 300, height = 300;
+	uint32 width = 1920, height = 1080;
 	camera cam = camCreate(width, height, M_PI / 3);
 	mat4 viewTransform = camViewTransform(vec4fPoint(0, 1.5, -5), vec4fPoint(0, 1, 0), vec4fVector(0, 1, 0));
 	camSetTransform(&cam, viewTransform);
@@ -192,20 +204,20 @@ void rtTest()
 
 void test()
 {
-	cylinder c;
-	c.min = 1;
-	c.max = 2;
+	cone c;
+	c.min = -0.5;
+	c.max = 0.5;
 	c.closed = true;
-	vec4f point = vec4fPoint(0, 2, 0.5);
-	/*vec4f direction = vec4fVector(0, 1, 1);
+	vec4f point = vec4fPoint(0, 0, -0.25);
+	vec4f direction = vec4fVector(0, 1, 0);
 	vec4fNormalize(&direction);
 	ray r = createRay(point, direction);
 	intersections xs = createIntersections();
-	cylinder_intersect(&c, &xs, r);
-	printIntersections(&xs);*/
+	cone_intersect(&c, &xs, r);
+	printIntersections(&xs);
 
-	vec4f n = cylinder_normalAt(&c, &point);
-	vec4fPrint(&n);
+	/*vec4f n = cylinder_normalAt(&c, &point);
+	vec4fPrint(&n);*/
 }
 
 #endif 

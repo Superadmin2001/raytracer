@@ -218,3 +218,8 @@ float min3f(float a, float b, float c)
 		else
 			return c;
 }
+
+float degreesToRadians(float degree)
+{
+	return degree*(M_PI / 180.0f);
+}

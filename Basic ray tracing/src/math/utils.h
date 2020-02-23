@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define _USE_MATH_DEFINES
 #include <math.h>
 
 typedef char		  int8;
@@ -88,5 +89,7 @@ int getRnd(int max, int min);
 float max3f(float a, float b, float c);
 
 float min3f(float a, float b, float c);
+
+float degreesToRadians(float degree);
 
 #endif
