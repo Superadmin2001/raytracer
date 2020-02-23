@@ -16,6 +16,7 @@
 #include "pattern\pattern_chekers.h"
 
 #include "shapes\cube.h"
+#include "shapes\cylinder.h"
 
 internal color rtVec3fToColor(vec3f vec)
 {
@@ -191,10 +192,20 @@ void rtTest()
 
 void test()
 {
-	cube c;
-	vec4f point = vec4fPoint(-1, -1, -1);
-	point = cube_normalAt(&c, &point);
-	vec4fPrint(&point);
+	cylinder c;
+	c.min = 1;
+	c.max = 2;
+	c.closed = true;
+	vec4f point = vec4fPoint(0, 2, 0.5);
+	/*vec4f direction = vec4fVector(0, 1, 1);
+	vec4fNormalize(&direction);
+	ray r = createRay(point, direction);
+	intersections xs = createIntersections();
+	cylinder_intersect(&c, &xs, r);
+	printIntersections(&xs);*/
+
+	vec4f n = cylinder_normalAt(&c, &point);
+	vec4fPrint(&n);
 }
 
 #endif 
