@@ -35,7 +35,7 @@ void printIntersections(intersections *is)
 	printf("[ ");
 	for (uint32 i = 0; i < is->occupied - 1; i++)
 		printf("%f, ", is->data[i].t);
-	printf("%f ]", is->data[is->occupied - 1].t);
+	printf("%f ]\n", is->data[is->occupied - 1].t);
 }
 
 int addIntersection(intersections *is, intersection i)

@@ -17,7 +17,7 @@ void cone_construct_default(cone *c)
 {
 	shape_construct(&c->base, mat4Identity(), createMaterial(createVec3f(0.8f, 1.f, 0.6f), 0.1, 0.7, 0.2, 200.f, 0.f, 0.0f, 1.0f));
 	c->base.vptr = (shape_vtable*)&the_cone_vtable;
-	c->min = FLT_MIN;
+	c->min = -(FLT_MIN-1);
 	c->max = FLT_MAX;
 	c->closed = 0;
 }
@@ -78,37 +78,41 @@ int cone_intersect(cone *c, intersections *is, ray r)
 {
 	intersectCaps(c, is, r);
 
-	float a = r.direction.x * r.direction.x - r.direction.y * r.direction.y + r.direction.z * r.direction.z;
-	float b = (2 * r.origin.x * r.direction.x) - (2 * r.origin.y * r.direction.y) + (2 * r.origin.z * r.direction.z);
-	float cc = r.origin.x*r.origin.x - r.origin.y*r.origin.y + r.origin.z*r.origin.z - 1;
+	double rdx2 = r.direction.x * r.direction.x;
+	double rdy2 = r.direction.y * r.direction.y;
+	double rdz2 = r.direction.z * r.direction.z;
 
-	if (fabsf(a) <= EPSILON && fabsf(b) <= EPSILON)
+	double a = rdx2 - rdy2 + rdz2;
+	double b = (2 * (double)r.origin.x * (double)r.direction.x) - (2 * (double)r.origin.y * (double)r.direction.y) + (2 * (double)r.origin.z * (double)r.direction.z);
+	double cc = (double)r.origin.x*(double)r.origin.x - (double)r.origin.y*(double)r.origin.y + (double)r.origin.z*(double)r.origin.z;
+
+	if (fabsf(a) <= EPSILON)
 	{
-		return 0;
-	}
-	else if (fabsf(a) <= EPSILON && fabsf(b) >= EPSILON)
-	{
+		if (fabsf(b) <= EPSILON)
+		{
+			return 0;
+		}
+
 		float t = -cc / (2 * b);
 		addIntersection(is, createIntersection(t, (shape*)c));
-		return 0;
+		return 1;
 	}
 
-	float d = b*b - 4 * a*cc;
-
+	double d = b*b - 4 * a*cc;
 	if (d < 0)
 		return 0;
 
-	float t0 = (-b - sqrtf(d)) / (2 * a);
-	float t1 = (-b + sqrtf(d)) / (2 * a);
+	double t0 = (-b - sqrt(d)) / (2 * a);
+	double t1 = (-b + sqrt(d)) / (2 * a);
 
 	if (t0 > t1)
-		swap2f(t0, t1);
+		swap2double(t0, t1);
 
-	float y0 = r.origin.y + t0*r.direction.y;
+	double y0 = r.origin.y + t0*r.direction.y;
 	if (c->min < y0 && y0 < c->max)
 		addIntersection(is, createIntersection(t0, (shape*)c));
 
-	float y1 = r.origin.y + t1*r.direction.y;
+	double y1 = r.origin.y + t1*r.direction.y;
 	if (c->min < y1 && y1 < c->max)
 		addIntersection(is, createIntersection(t1, (shape*)c));
 

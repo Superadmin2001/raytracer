@@ -122,7 +122,7 @@ void render()
 	light *lights = (light*)malloc(sizeof(light));
 	lights[0] = l;
 
-	uint8 shapeCount = 8;
+	uint8 shapeCount = 9;
 	shape **shapes = (shape**)malloc(sizeof(shape*) * shapeCount);
 	shapes[0] = (shape*)&middle;
 	shapes[1] = (shape*)&right;
@@ -178,15 +178,26 @@ void render()
 	cylinderSetTransform(&cyl, cylinderTransform);
 	shapes[7] = (shape*)&cyl;
 
+	cone cone;
+	cone_construct_default(&cone);
+	cone.min = -1;
+	cone.max = 1;
+	cone.closed = false;
+	mat4 coneRotaion = mat4RotationX(degreesToRadians(20));
+	mat4 coneTranslation = mat4Translation(vec4fVector(-2, 2, 0));
+	mat4 coneTransform = mat4Mul(&coneTranslation, &coneRotaion);
+	coneSetTransform(&cone, coneTransform);
+	shapes[8] = (shape*)&cone;
+
 	world w = worldCreate(lights, 1, shapes, shapeCount);
 
-	uint32 width = 1920, height = 1080;
+	uint32 width = 200, height = 200;
 	camera cam = camCreate(width, height, M_PI / 3);
 	mat4 viewTransform = camViewTransform(vec4fPoint(0, 1.5, -5), vec4fPoint(0, 1, 0), vec4fVector(0, 1, 0));
 	camSetTransform(&cam, viewTransform);
 
 	color *image = camRender(cam, w);
-	stbi_write_jpg("cube.jpg", width, height, 3, image, 100);
+	stbi_write_jpg("cone.jpg", width, height, 3, image, 100);
 
 	worldDestroy(&w);
 }	
@@ -205,19 +216,17 @@ void rtTest()
 void test()
 {
 	cone c;
-	c.min = -0.5;
-	c.max = 0.5;
-	c.closed = true;
-	vec4f point = vec4fPoint(0, 0, -0.25);
-	vec4f direction = vec4fVector(0, 1, 0);
+	c.min = -(FLT_MAX-1);
+	c.max = FLT_MAX;
+	c.closed = false;
+	vec4f point = vec4fPoint(0, 0, -5);
+	vec4f direction = vec4fVector(1, 1, 1);
 	vec4fNormalize(&direction);
 	ray r = createRay(point, direction);
 	intersections xs = createIntersections();
 	cone_intersect(&c, &xs, r);
 	printIntersections(&xs);
-
-	/*vec4f n = cylinder_normalAt(&c, &point);
-	vec4fPrint(&n);*/
+	system("pause");
 }
 
 #endif 
