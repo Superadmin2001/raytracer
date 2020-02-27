@@ -182,22 +182,22 @@ void render()
 	cone_construct_default(&cone);
 	cone.min = -1;
 	cone.max = 1;
-	cone.closed = false;
-	mat4 coneRotaion = mat4RotationX(degreesToRadians(20));
-	mat4 coneTranslation = mat4Translation(vec4fVector(-2, 2, 0));
+	cone.closed = true;
+	mat4 coneRotaion = mat4RotationX(degreesToRadians(80));
+	mat4 coneTranslation = mat4Translation(vec4fVector(-2.5, 2.5, 0));
 	mat4 coneTransform = mat4Mul(&coneTranslation, &coneRotaion);
 	coneSetTransform(&cone, coneTransform);
 	shapes[8] = (shape*)&cone;
 
 	world w = worldCreate(lights, 1, shapes, shapeCount);
 
-	uint32 width = 200, height = 200;
+	uint32 width = 4000, height = 4000;
 	camera cam = camCreate(width, height, M_PI / 3);
 	mat4 viewTransform = camViewTransform(vec4fPoint(0, 1.5, -5), vec4fPoint(0, 1, 0), vec4fVector(0, 1, 0));
 	camSetTransform(&cam, viewTransform);
 
 	color *image = camRender(cam, w);
-	stbi_write_jpg("cone.jpg", width, height, 3, image, 100);
+	stbi_write_jpg("coneDebug4000x4000.jpg", width, height, 3, image, 100);
 
 	worldDestroy(&w);
 }	

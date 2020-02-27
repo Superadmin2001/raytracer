@@ -49,10 +49,12 @@ void coneSetPattern(cone *c, pattern *pn)
 
 internal uint8 checkCap(ray r, float t, float trunc)
 {
-	//trunc = fabsf(trunc);
+	trunc = fabsf(trunc);
 
 	float x = r.origin.x + t*r.direction.x;
 	float z = r.origin.z + t*r.direction.z;
+
+	//return (x*x + z*z) < trunc;
 
 	if ((x*x + z*z) <= trunc + EPSILON || (x*x + z*z) <= trunc - EPSILON)
 		return true;
@@ -78,13 +80,13 @@ int cone_intersect(cone *c, intersections *is, ray r)
 {
 	intersectCaps(c, is, r);
 
-	double rdx2 = r.direction.x * r.direction.x;
-	double rdy2 = r.direction.y * r.direction.y;
-	double rdz2 = r.direction.z * r.direction.z;
+	float rdx2 = r.direction.x * r.direction.x;
+	float rdy2 = r.direction.y * r.direction.y;
+	float rdz2 = r.direction.z * r.direction.z;
 
-	double a = rdx2 - rdy2 + rdz2;
-	double b = (2 * (double)r.origin.x * (double)r.direction.x) - (2 * (double)r.origin.y * (double)r.direction.y) + (2 * (double)r.origin.z * (double)r.direction.z);
-	double cc = (double)r.origin.x*(double)r.origin.x - (double)r.origin.y*(double)r.origin.y + (double)r.origin.z*(double)r.origin.z;
+	float a = rdx2 - rdy2 + rdz2;
+	float b = (2 * r.origin.x * r.direction.x) - (2 * r.origin.y * r.direction.y) + (2 * r.origin.z * r.direction.z);
+	float cc = r.origin.x*r.origin.x - r.origin.y*r.origin.y + r.origin.z*r.origin.z;
 
 	if (fabsf(a) <= EPSILON)
 	{
@@ -98,26 +100,71 @@ int cone_intersect(cone *c, intersections *is, ray r)
 		return 1;
 	}
 
-	double d = b*b - 4 * a*cc;
+	float d = b*b - 4 * a*cc;
 	if (d < 0)
 		return 0;
 
-	double t0 = (-b - sqrt(d)) / (2 * a);
-	double t1 = (-b + sqrt(d)) / (2 * a);
+	float t0 = (-b - sqrtf(d)) / (2 * a);
+	float t1 = (-b + sqrtf(d)) / (2 * a);
 
 	if (t0 > t1)
-		swap2double(t0, t1);
+		swap2f(t0, t1);
 
-	double y0 = r.origin.y + t0*r.direction.y;
+	float y0 = r.origin.y + t0*r.direction.y;
 	if (c->min < y0 && y0 < c->max)
 		addIntersection(is, createIntersection(t0, (shape*)c));
 
-	double y1 = r.origin.y + t1*r.direction.y;
+	float y1 = r.origin.y + t1*r.direction.y;
 	if (c->min < y1 && y1 < c->max)
 		addIntersection(is, createIntersection(t1, (shape*)c));
 
 	return 1;
 }
+
+//int cone_intersect(cone *c, intersections *is, ray r)
+//{
+//	intersectCaps(c, is, r);
+//
+//	double rdx2 = r.direction.x * r.direction.x;
+//	double rdy2 = r.direction.y * r.direction.y;
+//	double rdz2 = r.direction.z * r.direction.z;
+//
+//	double a = rdx2 - rdy2 + rdz2;
+//	double b = (2 * (double)r.origin.x * (double)r.direction.x) - (2 * (double)r.origin.y * (double)r.direction.y) + (2 * (double)r.origin.z * (double)r.direction.z);
+//	double cc = (double)r.origin.x*(double)r.origin.x - (double)r.origin.y*(double)r.origin.y + (double)r.origin.z*(double)r.origin.z;
+//
+//	if (fabsf(a) <= EPSILON)
+//	{
+//		if (fabsf(b) <= EPSILON)
+//		{
+//			return 0;
+//		}
+//
+//		float t = -cc / (2 * b);
+//		addIntersection(is, createIntersection(t, (shape*)c));
+//		return 1;
+//	}
+//
+//	double d = b*b - 4 * a*cc;
+//	if (d < 0)
+//		return 0;
+//
+//	double t0 = (-b - sqrt(d)) / (2 * a);
+//	double t1 = (-b + sqrt(d)) / (2 * a);
+//
+//	if (t0 > t1)
+//		swap2double(t0, t1);
+//
+//	double y0 = r.origin.y + t0*r.direction.y;
+//	if (c->min < y0 && y0 < c->max)
+//		addIntersection(is, createIntersection(t0, (shape*)c));
+//
+//	double y1 = r.origin.y + t1*r.direction.y;
+//	if (c->min < y1 && y1 < c->max)
+//		addIntersection(is, createIntersection(t1, (shape*)c));
+//
+//	return 1;
+//}
 
 vec4f cone_normalAt(cone *c, vec4f *point)
 {
