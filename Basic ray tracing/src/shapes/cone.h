@@ -1,7 +1,7 @@
 #ifndef CONE_H
 #define CONE_H
 
-#include "../shape.h"
+#include "shape.h"
 
 typedef struct cone
 {

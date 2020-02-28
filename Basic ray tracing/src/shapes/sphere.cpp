@@ -1,5 +1,5 @@
 #include "sphere.h"
-#include "intersection.h"
+#include "..\intersection.h"
 
 void sphereSetTransform(sphere *s, mat4 m)
 {

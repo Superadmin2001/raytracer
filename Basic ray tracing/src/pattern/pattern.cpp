@@ -3,7 +3,7 @@
 #include <math.h>
 
 #include "../constants.h"
-#include "../shape.h"
+#include "../shapes/shape.h"
 
 vec3f stripeAt(pattern *pn, vec4f *point)
 {

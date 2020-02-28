@@ -1,8 +1,8 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 
-#include "material.h"
-#include "ray.h"
+#include "../material.h"
+#include "../ray.h"
 
 typedef struct intersections intersections;
 
@@ -14,11 +14,14 @@ typedef struct shape_vtable
 	vec4f(*normalAt)(shape *s, vec4f *point);
 } shape_vtable;
 
+typedef struct group group;
+
 struct shape
 {
 	shape_vtable *vptr;
 	mat4 transform;
 	material material;
+	group* parent;
 };
 
 void shape_construct(shape *s, mat4 transform, material material);
@@ -29,5 +32,8 @@ void shape_setTransform(shape *s, mat4 transform);
 int shape_intersect(shape *s, intersections *is, ray r);
 
 vec4f shape_normalAt(shape *s, vec4f *point);
+
+vec4f shapeWorldToObject(shape *s, vec4f *point);
+vec4f shapeNormalToWorld(shape *s, vec4f *normal);
 
 #endif

@@ -1,4 +1,5 @@
 #include "intersection.h"
+#include "defines.h"
 
 intersection createIntersection(float t, shape *object)
 {
@@ -34,11 +35,53 @@ void printIntersections(intersections *is)
 
 	printf("[ ");
 	for (uint32 i = 0; i < is->occupied - 1; i++)
-		printf("%f, ", is->data[i].t);
-	printf("%f ]\n", is->data[is->occupied - 1].t);
+		printf("%f(%p), ", is->data[i].t, is->data[i].object);
+	printf("%f(%p) ]\n", is->data[is->occupied - 1].t, is->data[is->occupied - 1].object);
+}
+
+internal void sortAdd(intersections *is, intersection i)
+{
+	is->data[is->occupied++] = i;
+
+	if (is->occupied == 1)
+		return;
+
+	intersection temp;
+	for (uint32 c1 = 0; c1 < is->occupied; c1++)
+	{
+		for (uint32 c2 = 0; c2 < is->occupied - 1; c2++)
+		{
+			if (is->data[c2].t > is->data[c2 + 1].t)
+			{
+				temp = is->data[c2];
+				is->data[c2] = is->data[c2 + 1];
+				is->data[c2 + 1] = temp;
+			}
+		}
+	}
 }
 
 int addIntersection(intersections *is, intersection i)
+{
+	if (is->occupied >= is->count)
+	{
+		void *reallocated = realloc(is->data, sizeof(intersection)*is->count * 2);
+		if (reallocated)
+		{
+			is->data = (intersection*)reallocated;
+			is->count *= 2;
+			sortAdd(is, i);
+			return true;
+		}
+
+		return false;
+	}
+
+	sortAdd(is, i);
+	return true;
+}
+
+int addIntersection_depr(intersections *is, intersection i)
 {
 	if (is->occupied < is->count)
 	{

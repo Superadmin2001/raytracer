@@ -1,7 +1,7 @@
 #include "plane.h"
 
-#include "defines.h"
-#include "intersection.h"
+#include "..\defines.h"
+#include "..\intersection.h"
 
 int plane_intersect(plane *p, intersections *is, ray r)
 {

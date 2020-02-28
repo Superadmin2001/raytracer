@@ -4,7 +4,7 @@
 #include "math\geometry.h"
 #include "material.h"
 #include "math\utils.h"
-#include "sphere.h"
+#include "shapes\shape.h"
 
 typedef struct world world;
 typedef struct comps comps;

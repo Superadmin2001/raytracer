@@ -8,7 +8,7 @@
 #include "world.h"
 #include "camera.h"
 
-#include "plane.h"
+#include "shapes/plane.h"
 
 #include "pattern\pattern.h"
 #include "pattern\pattern_gradient.h"
@@ -18,6 +18,8 @@
 #include "shapes\cube.h"
 #include "shapes\cylinder.h"
 #include "shapes\cone.h"
+#include "shapes\sphere.h"
+#include "shapes\group.h"
 
 internal color rtVec3fToColor(vec3f vec)
 {
@@ -110,7 +112,7 @@ void render()
 
 	sphere left;
 	sphere_construct_default(&left);
-	translation = mat4Translation(vec4fVector(-1.5, 0.33+0.7, -0.75));
+	translation = mat4Translation(vec4fVector(-1.5, 0.33, -0.75));
 	scaling = mat4Scaling(vec4fVector(0.33, 0.33, 0.33));
 	transform = mat4Mul(&translation, &scaling);
 	sphereSetTransform(&left, transform);
@@ -193,42 +195,66 @@ void render()
 
 	world w = worldCreate(lights, 1, shapes, shapeCount);
 
-	uint32 width = 4000, height = 4000;
+	uint32 width = 200, height = 200;
 	camera cam = camCreate(width, height, M_PI / 3);
 	mat4 viewTransform = camViewTransform(vec4fPoint(0, 1.5, -5), vec4fPoint(0, 1, 0), vec4fVector(0, 1, 0));
 	camSetTransform(&cam, viewTransform);
 
 	color *image = camRender(cam, w);
-	stbi_write_jpg("fixedCone4000x4000.jpg", width, height, 3, image, 100);
+	stbi_write_jpg("images/group.jpg", width, height, 3, image, 100);
 
 	worldDestroy(&w);
 }	
 
 void rtTest()
 {
-	sphere glassSphere;
-	sphereCreateGlass(&glassSphere, 1.5f);
-	ray r = createRay(vec4fVector(0, 0.99f, -2), vec4fPoint(0, 0, 1));
-	intersections xs = createIntersections();
-	addIntersection(&xs, createIntersection(1.8589f, (shape*)&glassSphere));
-	comps cmp = prepareComputations(xs.data[0], r, &xs);
-	float reflectance = schlick(&cmp);
+	group g1, g2;
+	groupConstructDefault(&g1);
+	groupConstructDefault(&g2);
+
+	groupSetTransform(&g1, mat4RotationY(M_PI_2));
+	groupSetTransform(&g2, mat4Scaling(vec4fVector(1, 2, 3)));
+
+	groupAddShape(&g1, (shape*)&g2);
+
+	sphere s;
+	sphere_construct_default(&s);
+	mat4 sphereTransform = mat4Translation(vec4fVector(5, 0, 0));
+	sphereSetTransform(&s, sphereTransform);
+	groupAddShape(&g2, (shape*)&s);
+
+	vec4f n = normalAt((shape*)&s, &vec4fPoint(1.7321, 1.1547, -5.5774));
+	vec4fPrint(&n);
+	system("pause");
 }
 
 void test()
 {
-	cone c;
-	c.min = -(FLT_MAX-1);
-	c.max = FLT_MAX;
-	c.closed = false;
-	vec4f point = vec4fPoint(0, 0, -5);
-	vec4f direction = vec4fVector(1, 1, 1);
-	vec4fNormalize(&direction);
-	ray r = createRay(point, direction);
-	intersections xs = createIntersections();
-	cone_intersect(&c, &xs, r);
-	printIntersections(&xs);
+	group g;
+	groupConstructDefault(&g);
+	ray r = createRay(vec4fPoint(0, 0, -5), vec4fVector(0, 0, 1));
+	intersections is = createIntersections();
+
+	sphere s1, s2, s3;
+	sphere_construct_default(&s1);
+	sphere_construct_default(&s2);
+	sphere_construct_default(&s3);
+
+	mat4 s1Translation = mat4Translation(vec4fVector(0, 0, -3));
+	sphereSetTransform(&s2, s1Translation);
+	mat4 s2Translation = mat4Translation(vec4fVector(5, 0, 0));
+	sphereSetTransform(&s3, s2Translation);
+
+	groupAddShape(&g, (shape*)&s1);
+	groupAddShape(&g, (shape*)&s2);
+	groupAddShape(&g, (shape*)&s3);
+
+	groupPrintShapesAddresses(&g);
+
+	groupIntersect(&g, &is, r);
+	printIntersections(&is);
 	system("pause");
+	intersectionsCleanUp(&is);
 }
 
 #endif 

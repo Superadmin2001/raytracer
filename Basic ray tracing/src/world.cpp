@@ -1,28 +1,29 @@
 #include "world.h"
 
 #include <vector>
+#include "defines.h"
 
-world worldCreateDefult()
-{
-	world result;
-	result.lightCount = 1;
-	result.lights = (light*)malloc(sizeof(light)*result.lightCount);
-	result.lights[0] = createPointLight(vec4fPoint(-10, 10, -10), createVec3f(1, 1, 1));
-	result.shapeCount = 2;
-	result.shapes = (shape**)malloc(sizeof(shape*)*result.shapeCount);
-
-	sphere *s = (sphere*)malloc(sizeof(sphere));
-	sphere_construct_default(s);
-
-	sphere *inner = (sphere*)malloc(sizeof(sphere));
-	sphere_construct_default(inner);
-	sphereSetTransform(inner, mat4Scaling(vec4fVector(0.5, 0.5, 0.5)));
-
-	result.shapes[0] = (shape*)s;
-	result.shapes[1] = (shape*)inner;
-
-	return result;
-}
+//world worldCreateDefult()
+//{
+//	world result;
+//	result.lightCount = 1;
+//	result.lights = (light*)malloc(sizeof(light)*result.lightCount);
+//	result.lights[0] = createPointLight(vec4fPoint(-10, 10, -10), createVec3f(1, 1, 1));
+//	result.shapeCount = 2;
+//	result.shapes = (shape**)malloc(sizeof(shape*)*result.shapeCount);
+//
+//	sphere *s = (sphere*)malloc(sizeof(sphere));
+//	sphere_construct_default(s);
+//
+//	sphere *inner = (sphere*)malloc(sizeof(sphere));
+//	sphere_construct_default(inner);
+//	sphereSetTransform(inner, mat4Scaling(vec4fVector(0.5, 0.5, 0.5)));
+//
+//	result.shapes[0] = (shape*)s;
+//	result.shapes[1] = (shape*)inner;
+//
+//	return result;
+//}
 
 world worldCreate(light *lights, uint32 lightCount, shape **shapes, uint32 shapeCount)
 {
@@ -79,8 +80,8 @@ comps prepareComputations(intersection i, ray r, intersections *is)
 		result.inside = 0;
 	}
 
-	result.overPoint = vec4fAdd(vec4fMulByVal(result.normalv, FLT_EPSILON * 15000), result.point);
-	result.underPoint = vec4fSub(result.point, vec4fMulByVal(result.normalv, FLT_EPSILON * 15000));
+	result.overPoint = vec4fAdd(vec4fMulByVal(result.normalv, /*FLT_EPSILON * 15000*/EPSILON), result.point);
+	result.underPoint = vec4fSub(result.point, vec4fMulByVal(result.normalv, /*FLT_EPSILON * 15000*/EPSILON));
 
 	// TODO: rewrite in C!
 	std::vector<shape*> containers;
@@ -190,6 +191,15 @@ void worldDestroy(world *w)
 }
 
 vec4f normalAt(shape *shape, vec4f *worldPoint)
+{
+	vec4f localPoint = shapeWorldToObject(shape, worldPoint);
+	vec4f localNormal = shape->vptr->normalAt(shape, &localPoint);
+	vec4f worldNormal = shapeNormalToWorld(shape, &localNormal);
+
+	return worldNormal;
+}
+
+vec4f normalAt_depr(shape *shape, vec4f *worldPoint)
 {
 	vec4f localPoint = mat4MulByVec4f(&mat4Inverse(&shape->transform), worldPoint);
 	vec4f localNormal = shape->vptr->normalAt(shape, &localPoint);

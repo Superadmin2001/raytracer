@@ -3,7 +3,7 @@
 
 #include "math\utils.h"
 #include "ray.h"
-#include "sphere.h"
+#include "shapes\shape.h"
 
 #include <stdio.h>
 

@@ -1,7 +1,7 @@
 #ifndef CYLINDER_H
 #define CYLIDNER_H
 
-#include "../shape.h"
+#include "shape.h"
 
 typedef struct cylinder
 {

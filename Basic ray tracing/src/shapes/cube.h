@@ -1,7 +1,7 @@
 #ifndef CUBE_H
 #define CUBE_H
 
-#include "../shape.h"
+#include "shape.h"
 
 typedef struct intersections intersections;
 
