@@ -183,9 +183,11 @@ void render()
 	cone.min = -1;
 	cone.max = 1;
 	cone.closed = true;
-	mat4 coneRotaion = mat4RotationX(degreesToRadians(80));
-	mat4 coneTranslation = mat4Translation(vec4fVector(-2.5, 2.5, 0));
-	mat4 coneTransform = mat4Mul(&coneTranslation, &coneRotaion);
+	mat4 coneRotaionX = mat4RotationX(degreesToRadians(80));
+	mat4 coneRotaionY = mat4RotationY(degreesToRadians(45));
+	mat4 coneRotaion = mat4Mul(&coneRotaionY, &coneRotaionX);
+	mat4 coneTranslation = mat4Translation(vec4fVector(-2, 2.5, 0));
+	mat4 coneTransform = mat4Mul(&coneTranslation, &coneRotaionX);
 	coneSetTransform(&cone, coneTransform);
 	shapes[8] = (shape*)&cone;
 
@@ -197,7 +199,7 @@ void render()
 	camSetTransform(&cam, viewTransform);
 
 	color *image = camRender(cam, w);
-	stbi_write_jpg("coneDebug4000x4000.jpg", width, height, 3, image, 100);
+	stbi_write_jpg("fixedCone4000x4000.jpg", width, height, 3, image, 100);
 
 	worldDestroy(&w);
 }	

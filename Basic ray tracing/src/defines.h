@@ -4,7 +4,7 @@
 #define internal static
 
 #include <float.h>
-#define EPSILON (FLT_EPSILON * 15000)
+#define EPSILON (FLT_EPSILON * 100)
 
 #define swapVec2fComponents(v) { float temp = v.x; v.x = v.y; v.y = temp; }
 #define swap2f(v1, v2) { float temp = v1; v1 = v2; v2 = temp; }

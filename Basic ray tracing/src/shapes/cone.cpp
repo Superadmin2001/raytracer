@@ -91,9 +91,7 @@ int cone_intersect(cone *c, intersections *is, ray r)
 	if (fabsf(a) <= EPSILON)
 	{
 		if (fabsf(b) <= EPSILON)
-		{
 			return 0;
-		}
 
 		float t = -cc / (2 * b);
 		addIntersection(is, createIntersection(t, (shape*)c));
